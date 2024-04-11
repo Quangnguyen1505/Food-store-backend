@@ -41,12 +41,8 @@ class FoodServices{
     static getAllFoodsBySearchTerm = async ({
         searchTerm
     }) => {
-        console.log("ss",searchTerm );
-        const Foundfoods = await food.find()
-        const foods =  Foundfoods
-        .filter(food => food.name.toLowerCase()
-        .includes(searchTerm.toLowerCase()));
-
+        const searchRegex = new RegExp(searchTerm, 'i');
+        const foods = await food.find({ name: { $regex: searchRegex } });
         return foods;
     }
 

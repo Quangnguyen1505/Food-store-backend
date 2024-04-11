@@ -14,6 +14,20 @@ class FoodController{
             message: "login user success",
             metadata: await AccessService.login(req.body)
         }).send(res);
+    } 
+
+    logout = async (req,res,next) => {
+        new SuccessResponse({
+            message: "logout user success",
+            metadata: await AccessService.logout(req.keyStore)
+        }).send(res);
+    }
+
+    getProfile = async (req,res,next) => {
+        new SuccessResponse({
+            message: "get profile success",
+            metadata: await AccessService.getProfile(req.userId)
+        }).send(res);
     }
 }
 

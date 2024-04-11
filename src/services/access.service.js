@@ -6,6 +6,8 @@ const crypto = require('crypto');
 const KeyTokenServices = require("./keyToken.service");
 const { getInfoData } = require("../utils");
 const userModel = require("../models/user.model");
+const tokenModel = require("../models/keyToken.model");
+const JWT = require('jsonwebtoken')
 
 RoleShop = {
     SHOP:'SHOP',
@@ -123,6 +125,17 @@ class AccessService {
        //     }
        // }
    }
+
+   static getProfile = async ( userId ) => {
+        const foundUser = await userModel.findById(userId).lean();
+        if(!foundUser) throw new BadRequestError('User is not registered');
+        return foundUser;
+    }
+
+    static logout = async (keyStore) => {
+        const delToken = await tokenModel.deleteOne(keyStore);
+        return delToken;
+    }
 }
 
 module.exports = AccessService
