@@ -26,6 +26,17 @@ class CartController{
             metadata: await cartServices.getCartByUserId(userId)
         }).send(res);
     }
+
+    deleteItem = async ( req, res, next ) => {
+        const userId = req.userId;
+        if (!userId) {
+            return res.status(400).json({ error: 'Missing userId in query parameters' });
+        }
+        new SuccessResponse({
+            message: "get Car Food success",
+            metadata: await cartServices.deleteFoodCart({userId, foodId: req.params.foodId})
+        }).send(res);
+    }
 }
 
 

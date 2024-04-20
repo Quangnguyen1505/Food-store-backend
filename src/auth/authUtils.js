@@ -2,6 +2,7 @@ const JWT = require('jsonwebtoken');
 const asyncHandler = require('../helper/asyncHandler')
 const keyStore = require('../models/keyToken.model');
 const { findByUserId } = require('../services/keyToken.service');
+const { AuthFailureError } = require('../core/error.response');
 const HEADER = {
     API_KEY: 'x-api-key',
     CLIENT_ID: 'x-client-id',
