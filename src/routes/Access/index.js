@@ -6,6 +6,8 @@ const { authencationV2 } = require('../../auth/authUtils');
 
 router.post("/signUp", handlerError(AccessService.signUp));
 router.post("/login", handlerError(AccessService.login));
+router.post("/forgotpassword", handlerError(AccessService.forgotPassword));
+router.post("/reset-password", handlerError(AccessService.resetPassword));
 
 router.use(authencationV2);
 

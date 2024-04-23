@@ -10,6 +10,20 @@ class CheckoutController{
         }).send(res);
     }
 
+    orderByUser = async ( req, res, next ) => {
+        new SuccessResponse({
+            message: "order By User success",
+            metadata: await CheckoutService.orderByUser(req.body)
+        }).send(res);
+    }
+
+    getListOrder = async ( req, res, next ) => {
+        new SuccessResponse({
+            message: "get List Order success",
+            metadata: await CheckoutService.getListOrder(req.userId, req.params.id)
+        }).send(res);
+    }
+
 }
 
 

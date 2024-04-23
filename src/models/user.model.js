@@ -17,6 +17,17 @@ const userSchema = new Schema({
         type:String,
         required:true,
     },
+    address:{
+        type:String,
+        required:true
+    },
+    resetPasswordToken: {
+        type: String,
+        default: ''
+    },
+     resetPasswordExpires: {
+         type: Date,
+    },
     status:{
         type:String,
         enum: ['active','inactive'],
