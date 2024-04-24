@@ -22,13 +22,26 @@ class FoodServices{
             cookTime
         })
 
+        const foundTag = await tagModel.findOne({name: tags});
+        if(!foundTag) throw new NotFoundError("tag is not exitst");
+        const foundTagAll = await tagModel.findOne({name: "All"});
+        foundTag.count += 1;
+        foundTagAll.count += 1;
+        await foundTag.save();
+        await foundTagAll.save();
+
         return newFood
     }
 
-    static getFood = async ()=>{
-        const foods = await food.find()
+    static getFood = async ({ limit = 8, page = 1 })=>{
+        const select = ['-__v', '-createdAt', '-updatedAt'];
+        const totalCount = await food.countDocuments();
+        const foods = await food.find().limit(limit).skip((page - 1) * limit).select(select);
         
-        return foods
+        return { 
+            foods,
+            totalCount
+        }
     }
 
     static getFoodById = async (FoodId)=>{
@@ -47,14 +60,17 @@ class FoodServices{
     }
 
     static createTag = async ({
-        name, count
-    }) =>{
-        const foundFood = await tagModel.findOne({name});
-        if(foundFood) throw new NotFoundError("tag is exitst");
+        name
+    }) => {
+        const foundTag = await tagModel.findOne({name});
+        if(foundTag) throw new NotFoundError("tag is exitst");
+        
+        const foundFoods = await food.find({tags: name});
+        if(!foundFoods) throw new NotFoundError("food is not exitst");
 
         const newTag = await tagModel.create({
             name,
-            count
+            count: foundFoods.length
         })
 
         return newTag
@@ -69,8 +85,13 @@ class FoodServices{
 
     static getAllFoodsByTag = async (tag)=>{
         const foundFood = await food.find({tags: tag});
-        if(!foundFood) throw new BadRequestError("tag is exists")
-        return foundFood
+        if(!foundFood) throw new BadRequestError("tag is exists");
+        const totalCount = await food.countDocuments();
+
+        return {
+            foundFood,
+            totalCount
+        }
     }
 }
 
