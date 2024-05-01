@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
-const MONGODB_URL = process.env.MONGODB_URL;
-
+const { db: { username, password, namedb }} = require('../config/config.mongodb')
+const MONGODB_URL_STRING = `mongodb+srv://${username}:${password}@cluster0.e8k4xen.mongodb.net/${namedb}`;
+console.log(MONGODB_URL_STRING);
 class ConnectMongoDB {
     constructor(){
         this.connect();
@@ -12,7 +13,7 @@ class ConnectMongoDB {
             mongoose.set("debug", { color: true});
         }
 
-        mongoose.connect(`${MONGODB_URL}`).then(()=>{
+        mongoose.connect(`${MONGODB_URL_STRING}`).then(()=>{
             console.log("mongoose connect successfully!!");
         }).catch((e)=>{
             console.log("mongoose connect failed!!");
