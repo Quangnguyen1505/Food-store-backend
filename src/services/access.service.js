@@ -7,8 +7,8 @@ const KeyTokenServices = require("./keyToken.service");
 const { getInfoData } = require("../utils");
 const userModel = require("../models/user.model");
 const tokenModel = require("../models/keyToken.model");
-const JWT = require('jsonwebtoken');
 const { sendMail } = require("../utils/sendMail");
+const { userValidate } = require("../helper/validation");
 
 RoleShop = {
     SHOP:'SHOP',
@@ -27,7 +27,7 @@ class AccessService {
            5. get data return login
        */
        //1.
-       const foundShop = await findByEmail({ email });
+       const foundShop = await findByEmail({ email: email.toLowerCase() });
        if(!foundShop) throw new BadRequestError('Shop is not registered');
 
        //2.
@@ -56,32 +56,21 @@ class AccessService {
    }
 
    static signUp = async ({ name, email, password, address})=>{
-       // try {
-           
+
+            const { error } = userValidate({ email, password });
+            if(error) throw new BadRequestError(error.details[0].message);
            // step1: check email exists??
-           const hodelShop = await userModel.findOne({ email }).lean();
+           const hodelShop = await userModel.findOne({ email: email.toLowerCase() }).lean();
            if(hodelShop){
                throw new BadRequestError('Error: Shop already registered!');
            }
            const passwordHash = await bcrypt.hash(password, 10);
            const newShop = await userModel.create({
-               name, email, password:passwordHash, roles:[RoleShop.SHOP], address
+               name, email: email.toLowerCase(), password:passwordHash, roles:[RoleShop.SHOP], address
            })
            if(newShop){
-               //created privateKey,publicKey
-               // const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa',{
-               //     modulusLength:4096,
-               //     publicKeyEncoding: {
-               //         type: 'pkcs1',
-               //         format: 'pem'
-               //     },
-               //     privateKeyEncoding: {
-               //         type: 'pkcs1',
-               //         format: 'pem'
-               //     },
-               //     // public key cryptography standards
-               // });
 
+               //created privateKey,publicKey
                const privateKey = crypto.randomBytes(64).toString('hex');
                const publicKey = crypto.randomBytes(64).toString('hex');
                console.log({privateKey,publicKey});
@@ -93,15 +82,7 @@ class AccessService {
                });
                if(!keyStore){
                    throw new BadRequestError('Error: keyStore error!');
-                   // return {
-                   //     code: 'xxx',
-                   //     message:'publicKeyString error!'
-                   // }
                }
-               // console.log("publicKeyString::", publicKeyString);
-               // const publicKeyObject = crypto.createPublicKey( publicKeyString );
-
-               // console.log("publicKeyObject::",publicKeyObject);
                // create token pair
                const tokens = await createTokenPair({ userId:newShop._id, email }, publicKey, privateKey );
                console.log("tokens create successfully!", tokens);
@@ -118,13 +99,6 @@ class AccessService {
                code: 200,
                metadata: null
            }
-       // } catch (error) {
-       //     return {
-       //         code: 'xxx',
-       //         message: error.message,
-       //         status: 'error'
-       //     }
-       // }
    }
 
    static getProfile = async ( userId ) => {
@@ -139,7 +113,6 @@ class AccessService {
    }
 
    static forgotPassword = async ({email}) => {
-        console.log("emailss", {email});
         const foundShop = await findByEmail({ email });
         if(!foundShop) throw new BadRequestError('Shop is not registered');
 

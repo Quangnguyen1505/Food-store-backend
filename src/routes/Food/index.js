@@ -10,4 +10,5 @@ router.get("/allSearch/:searchTerm", handlerError(FoodService.getAllFoodsBySearc
 router.post("/tag", handlerError(FoodService.createTag));
 router.get("/tag", handlerError(FoodService.getTags));
 router.get("/AllFoodBytag/:tag", handlerError(FoodService.getAllFoodsByTag));
+
 module.exports = router

@@ -7,5 +7,6 @@ const { authencationV2 } = require('../../auth/authUtils');
 router.use(authencationV2);
 router.post("", handlerError(CheckoutController.getCheckoutReview));
 router.post("/create", handlerError(CheckoutController.orderByUser));
-router.get("/listOrder/:id", handlerError(CheckoutController.getListOrder));
+router.get("/listOrder", handlerError(CheckoutController.getListOrder));
+
 module.exports = router

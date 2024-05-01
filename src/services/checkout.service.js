@@ -29,15 +29,13 @@ class CheckoutService {
     }
 
     static async orderByUser({ userId, cartId, user_address, foods_order = [] }) {
-        console.log("orderByUser", { userId, cartId, user_address, foods_order });
+ 
         const foundCart = await cartModel.findById(cartId);
         if(!foundCart) throw new NotFoundError("Cart not found");
 
         if(!foundCart.cart_foods.length) throw new BadRequestError("cart foods not exitst!!");
 
         const orderCheckout = await CheckoutService.getListCheckout({ userId, cartId, foods_order });
-
-        console.log("orderCheckout", orderCheckout);
 
         const newOrder = await orderModel.create({
             order_userId: convertToObject(userId),
@@ -53,11 +51,16 @@ class CheckoutService {
         return newOrder;
     }
 
-    static async getListOrder( userId, idCheckout ){
-        console.log("getListOrder", { userId, idCheckout });
-        const orders = await orderModel.find({order_userId: convertToObject(userId), _id: idCheckout}).populate('order_userId', 'name address')
+    static async getListOrder({ userId, limit = 4, page = 1 }){
+        const select = ['-__v', '-createdAt', '-updatedAt'];
+        const orders = await orderModel.find({order_userId: convertToObject(userId)}).populate('order_userId', 'name address')
+        .limit(limit).skip((page - 1) * limit).select(select);
+        const totalCountOrder = await orderModel.countDocuments({order_userId: convertToObject(userId)});
         if(!orders) throw new NotFoundError("Order not found");
-        return orders;
+        return { 
+            orders,
+            totalCountOrder
+        }
     } 
 }
 

@@ -13,4 +13,5 @@ router.use(authencationV2);
 
 router.get("/logout", handlerError(AccessService.logout));
 router.get("/profile", handlerError(AccessService.getProfile));
+
 module.exports = router

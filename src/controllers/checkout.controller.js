@@ -20,7 +20,7 @@ class CheckoutController{
     getListOrder = async ( req, res, next ) => {
         new SuccessResponse({
             message: "get List Order success",
-            metadata: await CheckoutService.getListOrder(req.userId, req.params.id)
+            metadata: await CheckoutService.getListOrder({userId: req.userId, ...req.query})
         }).send(res);
     }
 
