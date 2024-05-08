@@ -45,6 +45,13 @@ class NotFoundError extends ErrorResponse {
     }
 }
 
+class NotFoundValueError extends ErrorResponse {
+    constructor( message = ReasonPhrases.UNPROCESSABLE_ENTITY, statusCode = StatusCodes.UNPROCESSABLE_ENTITY ){
+        super(message, statusCode );
+    }
+}
+
+
 class ForBiddenError extends ErrorResponse {
     constructor( message = ReasonPhrases.FORBIDDEN, statusCode = StatusCodes.FORBIDDEN ){
         super(message, statusCode );
@@ -56,5 +63,6 @@ module.exports = {
     BadRequestError,
     AuthFailureError,
     NotFoundError,
-    ForBiddenError
+    ForBiddenError,
+    NotFoundValueError
 }
