@@ -3,9 +3,10 @@ const cartModel = require("../models/cart.model");
 const orderModel = require("../models/order.model");
 const { deleteCart } = require("../models/repo/order.repo");
 const { convertToObject } = require("../utils");
+const DiscountService = require("./discount.service");
 
 class CheckoutService {
-    static async getListCheckout({ userId, cartId, foods_order = [] }) {
+    static async getListCheckout({ userId, cartId, foods_order = [], discount_code = null }) {
         const foundCart = await cartModel.findById(cartId);
         if(!foundCart) throw new NotFoundError("Cart not found");
 
@@ -25,21 +26,29 @@ class CheckoutService {
                 throw new BadRequestError("Food not found in cart");
             }
         }
-        return orderCheckout;
+        if(discount_code){
+            const discount = await DiscountService.getDiscountAmout({ userId, foodItem: orderCheckout.items_food, discountCode: discount_code });
+            console.log("discount", discount);
+            return {
+                orderCheckout,
+                discount
+            }
+        }
+
+        return orderCheckout
+          
     }
 
-    static async orderByUser({ userId, cartId, user_address, foods_order = [] }) {
- 
+    static async orderByUser({ userId, cartId, user_address, foods_order = [], discountCode = null}) {
         const foundCart = await cartModel.findById(cartId);
         if(!foundCart) throw new NotFoundError("Cart not found");
 
         if(!foundCart.cart_foods.length) throw new BadRequestError("cart foods not exitst!!");
 
-        const orderCheckout = await CheckoutService.getListCheckout({ userId, cartId, foods_order });
-
+        const orderCheckout = await CheckoutService.getListCheckout({ userId, cartId, discount_code: discountCode, foods_order });
         const newOrder = await orderModel.create({
             order_userId: convertToObject(userId),
-            order_checkout: orderCheckout.total_price,
+            order_checkout: orderCheckout.total_price || orderCheckout.discount.totalAfterApplyDiscount,
             order_products: foods_order,
             order_shipping: user_address
         });
