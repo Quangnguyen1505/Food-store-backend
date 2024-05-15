@@ -1,6 +1,7 @@
 const { NotFoundError, BadRequestError } = require('../core/error.response');
 const food = require('../models/food.model');
 const tagModel = require('../models/tag.model');
+const { createNotification } = require('./notification.service');
 
 class FoodServices{
 
@@ -22,6 +23,9 @@ class FoodServices{
             cookTime
         })
 
+        if(!newFood) throw new BadRequestError("food create failed!!");
+
+        //tag
         const foundTag = await tagModel.findOne({name: tags});
         if(!foundTag) throw new NotFoundError("tag is not exitst");
         const foundTagAll = await tagModel.findOne({name: "All"});
@@ -29,6 +33,15 @@ class FoodServices{
         foundTagAll.count += 1;
         await foundTag.save();
         await foundTagAll.save();
+
+        //noti
+        await createNotification({
+            noti_type: "SHOP-001",
+            noti_options: {
+                foodId: newFood._id,
+                foodName: newFood.name
+            }
+        });
 
         return newFood
     }

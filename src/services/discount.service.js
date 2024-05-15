@@ -1,6 +1,7 @@
 const { BadRequestError, NotFoundValueError } = require('../core/error.response')
 const discountModel = require('../models/discount.model');
-const { checkExistDisocunt } = require('../models/repo/discount.repo')
+const { checkExistDisocunt } = require('../models/repo/discount.repo');
+const { createNotification } = require('./notification.service');
 
 class DiscountService {
   static async createDiscount( payload ) {
@@ -18,7 +19,7 @@ class DiscountService {
       throw new BadRequestError('Invalid date range');
     }
 
-    const newDiscount = discountModel.create({
+    const newDiscount = await discountModel.create({
       discount_name: name,
       discount_code: code,
       discount_value: value,
@@ -27,6 +28,16 @@ class DiscountService {
       discount_count: count,
       discount_food_ids: foodIds
     });
+
+    if(!newDiscount) throw new BadRequestError('Create discount failed');
+
+    await createNotification({
+      noti_type: "PROMOTION-001",
+      noti_options: {
+        discountId: newDiscount._id,
+        discountName: newDiscount.discount_name
+      }
+    })
 
     return newDiscount;
   }
