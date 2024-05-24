@@ -2,15 +2,8 @@ const { NotFoundError, BadRequestError } = require('../core/error.response');
 const food = require('../models/food.model');
 const tagModel = require('../models/tag.model');
 const { createNotification } = require('./notification.service');
-
-// const { getRedis } = require('../db/init.redis');
-// const { promisify } = require('util');
-// const {
-//     instanceConnect: redisClient
-// } = getRedis();
-// const getAsync = promisify(redisClient.get).bind(redisClient);
-
 const redis = require('../db/init.redis');
+const { getFoodRedis, cacheCount, setItemFoods, setTotalCount } = require('../db/repo/redis.repo');
 
 class FoodServices{
 
@@ -58,8 +51,8 @@ class FoodServices{
     static getFood = async ({ limit = 8, page = 1 }) => {
         let totalCount, foods;
     
-        const cachedFoods = await redis.get(`foods-item-${limit}-${page}`);
-        const cachedTotalCount = await redis.get('foods-totalCount');
+        const cachedFoods = await getFoodRedis({limit, page});
+        const cachedTotalCount = await cacheCount();
     
         if (cachedFoods && cachedTotalCount) {
             foods = JSON.parse(cachedFoods);
@@ -74,10 +67,12 @@ class FoodServices{
         totalCount = await food.countDocuments();
         foods = await food.find().limit(limit).skip((page - 1) * limit).select(select);
     
-        // Lưu dữ liệu vào Redis
-        await redis.set(`foods-item-${limit}-${page}`, JSON.stringify(foods), 'EX', 3600);
-        await redis.set('foods-totalCount', totalCount.toString(), 'EX', 3600);
+        // await redis.set(`foods-item-${limit}-${page}`, JSON.stringify(foods), 'EX', 3600);
+        // await redis.set('foods-totalCount', totalCount.toString(), 'EX', 3600);
     
+        await setItemFoods({limit, page, foods});
+        await setTotalCount(totalCount);
+
         return { 
             foods,
             totalCount
