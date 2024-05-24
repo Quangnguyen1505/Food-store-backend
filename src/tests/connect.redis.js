@@ -1,11 +1,18 @@
-import { createClient } from 'redis';
+const redis = require("redis");
+const connectRedis = async () => {
+    
+    const client = redis.createClient();
 
-const client = await createClient()
-  .on('error', err => console.log('Redis Client Error', err))
-  .connect(() => {
-    console.log("connect success");
-  });
+    client.on("error", function(error) {
+    console.error(error);
+    });
 
-const test = ()=>{
-    client.hset
+    client.on("connect", () => {
+        console.log("connect")
+    })
+    client.get("key", redis.print);
 }
+
+
+module.exports = connectRedis;
+

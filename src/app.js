@@ -18,10 +18,12 @@ app.use(cors());
 
 //init db
 require('./db/init.mongo');
-const initRedis = require('./db/init.redis');
-initRedis.initRedis();
+// const initRedis = require('./db/init.redis');
+// initRedis.initRedis();
+const redisconecct = require('./tests/connect.redis');
+redisconecct();
 //init routes
-app.use('/', require('./routes'))
+// app.use('/', require('./routes'))
 
 //handling error
 app.use(( req, res, next ) => {
