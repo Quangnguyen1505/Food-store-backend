@@ -18,7 +18,8 @@ app.use(cors());
 
 //init db
 require('./db/init.mongo');
-
+const initRedis = require('./db/init.redis');
+initRedis.initRedis();
 //init routes
 app.use('/', require('./routes'))
 
