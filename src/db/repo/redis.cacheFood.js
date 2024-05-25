@@ -18,9 +18,19 @@ const setTotalCount = async(totalCount) => {
     return await redis.set('foods-totalCount', totalCount.toString(), 'EX', 3600);
 }
 
+const foundRedis = async (key) => {
+    return await redis.get(key); 
+}
+
+const setRedis = async (key, body) => {
+    return await redis.set(key, JSON.stringify(body), 'EX', 3600);
+}
+
 module.exports = {
     getFoodRedis,
     cacheCount,
     setItemFoods,
-    setTotalCount
+    setTotalCount,
+    foundRedis,
+    setRedis
 }

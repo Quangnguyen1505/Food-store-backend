@@ -5,7 +5,7 @@ const handlerError = require('../../helper/asyncHandler');
 const rateLimiter = require('../../middleware/rateLimiter');
 
 router.post("", handlerError(FoodService.createFood));
-router.use(rateLimiter);
+// router.use(rateLimiter);
 router.get("", handlerError(FoodService.getFood));
 router.get("/findone/:id", handlerError(FoodService.getFoodById));
 router.get("/allSearch/:searchTerm", handlerError(FoodService.getAllFoodsBySearchTerm));

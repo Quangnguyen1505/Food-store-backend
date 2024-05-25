@@ -2,8 +2,7 @@ const { NotFoundError, BadRequestError } = require('../core/error.response');
 const food = require('../models/food.model');
 const tagModel = require('../models/tag.model');
 const { createNotification } = require('./notification.service');
-const redis = require('../db/init.redis');
-const { getFoodRedis, cacheCount, setItemFoods, setTotalCount } = require('../db/repo/redis.repo');
+const { getFoodRedis, cacheCount, setItemFoods, setTotalCount, setRedis, foundRedis } = require('../db/repo/redis.cacheFood');
 
 class FoodServices{
 
@@ -90,8 +89,20 @@ class FoodServices{
     static getAllFoodsBySearchTerm = async ({
         searchTerm
     }) => {
+        let foods;
+        
+        const key = `food-search`
+        const getRedisSearch = await foundRedis(key);
+        if( getRedisSearch ){
+            foods = JSON.parse(getRedisSearch);
+            return foods;
+        }
+
         const searchRegex = new RegExp(searchTerm, 'i');
-        const foods = await food.find({ name: { $regex: searchRegex } });
+        foods = await food.find({ name: { $regex: searchRegex } });
+
+        await setRedis(key, foods);
+
         return foods;
     }
 
@@ -107,22 +118,38 @@ class FoodServices{
         const newTag = await tagModel.create({
             name,
             count: foundFoods.length
-        })
+        });
 
-        return newTag
+        return newTag;
     }
 
     static getTags = async ()=>{
        
-        const foundTag = await tagModel.find()
+        const foundTag = await tagModel.find();
         
-        return foundTag
+        return foundTag;
     }
 
     static getAllFoodsByTag = async (tag)=>{
-        const foundFood = await food.find({tags: tag});
+        let foundFood, totalCount;
+        const key1 = `item-food-${tag}`, key2 = `total-count-food-${tag}`;
+        const foundFoodByTagFromRedis = await foundRedis(key1);
+        const foundTotalCountFromRedis = await foundRedis(key2);
+        if( foundFoodByTagFromRedis && foundTotalCountFromRedis ){
+            foundFood = JSON.parse(foundFoodByTagFromRedis);
+            totalCount = parseInt(foundTotalCountFromRedis, 10);
+            return {
+                foundFood,
+                totalCount
+            }
+        }
+
+        foundFood = await food.find({tags: tag});
         if(!foundFood) throw new BadRequestError("tag is exists");
-        const totalCount = await food.countDocuments();
+        totalCount = await food.countDocuments();
+
+        await setRedis(key1, foundFood);
+        await setRedis(key2, totalCount);
 
         return {
             foundFood,
