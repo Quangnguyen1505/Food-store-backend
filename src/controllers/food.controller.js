@@ -9,6 +9,12 @@ class FoodController{
         }).send(res);
     }
 
+    updateFavorite = async ( req, res, next ) => {
+        new SuccessResponse({
+            message: "update Favorite food success",
+            metadata: await FoodServices.updateFavorite({userId: req.userId, foodId: req.params.id})
+        }).send(res);
+    }
     
     getFood = async ( req, res, next ) => {
         new SuccessResponse({

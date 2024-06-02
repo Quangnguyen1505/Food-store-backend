@@ -3,6 +3,8 @@ const food = require('../models/food.model');
 const tagModel = require('../models/tag.model');
 const { createNotification } = require('./notification.service');
 const { getFoodRedis, cacheCount, setItemFoods, setTotalCount, setRedis, foundRedis } = require('../db/repo/redis.cacheFood');
+const { findUserById } = require('../models/repo/access.repo');
+const { findFoodById } = require('../models/repo/cart.repo');
 
 class FoodServices{
 
@@ -47,30 +49,42 @@ class FoodServices{
         return newFood
     }
 
+    static updateFavorite = async ({ 
+        userId, foodId 
+    }) => {
+        const foundUser = await findUserById(userId);
+        if(!foundUser) throw new BadRequestError('User not exitst!!');
+
+        const foundFood = await findFoodById(foodId);
+        if(!foundFood) throw new BadRequestError('Food not exitst!!');
+
+        foundFood.favorite = !foundFood.favorite;
+        await foundFood.save();
+
+        return foundFood;
+    } 
+
     static getFood = async ({ limit = 8, page = 1 }) => {
         let totalCount, foods;
     
-        const cachedFoods = await getFoodRedis({limit, page});
-        const cachedTotalCount = await cacheCount();
+        // const cachedFoods = await getFoodRedis({limit, page});
+        // const cachedTotalCount = await cacheCount();
     
-        if (cachedFoods && cachedTotalCount) {
-            foods = JSON.parse(cachedFoods);
-            totalCount = parseInt(cachedTotalCount, 10);
-            return { 
-                foods,
-                totalCount
-            };
-        }
+        // if (cachedFoods && cachedTotalCount) {
+        //     foods = JSON.parse(cachedFoods);
+        //     totalCount = parseInt(cachedTotalCount, 10);
+        //     return { 
+        //         foods,
+        //         totalCount
+        //     };
+        // }
     
         const select = ['-__v', '-createdAt', '-updatedAt'];
         totalCount = await food.countDocuments();
         foods = await food.find().limit(limit).skip((page - 1) * limit).select(select);
     
-        // await redis.set(`foods-item-${limit}-${page}`, JSON.stringify(foods), 'EX', 3600);
-        // await redis.set('foods-totalCount', totalCount.toString(), 'EX', 3600);
-    
-        await setItemFoods({limit, page, foods});
-        await setTotalCount(totalCount);
+        // await setItemFoods({limit, page, foods});
+        // await setTotalCount(totalCount);
 
         return { 
             foods,
