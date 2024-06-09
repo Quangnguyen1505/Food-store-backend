@@ -11,7 +11,7 @@ class FoodServices{
     static insertFood = async ({
         payload
     }) =>{
-        const { name, price, tags, favorite, stars, imageUrl, origins, cookTime  } = payload
+        const { name, price, tags, favorite = false, stars = 5.0, imageUrl, origins, cookTime  } = payload
         const foundFood = await food.findOne({name});
         if(foundFood) throw new NotFoundError("food is not exitst");
 
@@ -169,6 +169,13 @@ class FoodServices{
             foundFood,
             totalCount
         }
+    }
+
+    static updateFood = async ( foodId, payload ) => {
+        const newFood = await food.findByIdAndUpdate(foodId, payload, {
+            new: true
+        });
+        return newFood
     }
 }
 

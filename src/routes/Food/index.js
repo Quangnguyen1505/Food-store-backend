@@ -6,7 +6,7 @@ const rateLimiter = require('../../middleware/rateLimiter');
 const { authencationV2 } = require('../../auth/authUtils');
 
 router.post("", handlerError(FoodService.createFood));
-// router.use(rateLimiter);
+
 router.get("", handlerError(FoodService.getFood));
 router.get("/findone/:id", handlerError(FoodService.getFoodById));
 router.get("/allSearch/:searchTerm", handlerError(FoodService.getAllFoodsBySearchTerm));
@@ -15,6 +15,8 @@ router.get("/tag", handlerError(FoodService.getTags));
 router.get("/AllFoodBytag/:tag", handlerError(FoodService.getAllFoodsByTag));
 
 router.use(authencationV2);
+router.use(rateLimiter);
 router.get("/favorite/:id", handlerError(FoodService.updateFavorite));
+router.post("/update/:foodId", handlerError(FoodService.updateFood));
 
 module.exports = router

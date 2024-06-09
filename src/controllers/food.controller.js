@@ -58,6 +58,13 @@ class FoodController{
             message: "get all food by tag success",
             metadata: await FoodServices.getAllFoodsByTag(req.params.tag)
         }).send(res);
+    } 
+
+    updateFood = async ( req, res, next ) => {
+        new SuccessResponse({
+            message: "update food success",
+            metadata: await FoodServices.updateFood( req.params.foodId, req.body )
+        }).send(res);
     }
 }
 
