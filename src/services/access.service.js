@@ -91,11 +91,13 @@ class AccessService {
             }
    }
 
-   static finalSignUp = async (hashEmail) => {
+   static finalSignUp = async (payload) => {
+        const { hashEmail } = payload;
+        console.log("hashEmail", hashEmail);
         const foundHashEmail = await userModel.findOne({email: new RegExp(`${hashEmail}$`)});
         if(foundHashEmail) {
             foundHashEmail.email = await atob(foundHashEmail.email.split('@')[0]);
-            foundHashEmail.save()
+            await foundHashEmail.save()
 
             //created privateKey,publicKey
             const privateKey = crypto.randomBytes(64).toString('hex');
@@ -113,11 +115,10 @@ class AccessService {
             // create token pair
             const tokens = await createTokenPair({ userId:foundHashEmail._id, email: foundHashEmail.email  }, publicKey, privateKey );
             console.log("tokens create successfully!", tokens);
-
             return {
                 code: 201,
                 metadata: {
-                    shop: getInfoData({ fileds:['_id', 'name', 'email'], object:foundHashEmail }),
+                    shop: getInfoData({ fileds:['_id', 'name', 'email'], object: foundHashEmail }),
                     tokens
                 }
             }
