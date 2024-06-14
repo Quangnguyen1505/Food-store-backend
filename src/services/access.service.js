@@ -10,8 +10,8 @@ const tokenModel = require("../models/keyToken.model");
 const { sendMail } = require("../utils/sendMail");
 const { userValidate } = require("../helper/validation");
 
-RoleShop = {
-    SHOP:'SHOP',
+Role = {
+    USER:'USER',
     WRITER:'WRITER',
     EDITOR: 'EDITOR',
     ADMIN: 'ADMIN'
@@ -50,7 +50,7 @@ class AccessService {
        })
 
        return {
-           shop: getInfoData({ fileds:['_id', 'name', 'email'], object:foundShop }),
+           shop: getInfoData({ fileds:['_id', 'name', 'email', 'roles'], object:foundShop }),
            tokens
        }
    }
@@ -68,7 +68,7 @@ class AccessService {
             const passwordHash = await bcrypt.hash(password, 10);
             const hashEmail = btoa(email) + '@' + hashRandom;
             const newShop = await userModel.create({
-                name, email: hashEmail, password:passwordHash, roles:[RoleShop.SHOP], address
+                name, email: hashEmail, password:passwordHash, roles:[Role.USER], address
             });
             if(newShop){
                 const html  = `<h2>Code: </h2> <br> <blockquote>${hashRandom}</blockquote>`
@@ -93,7 +93,6 @@ class AccessService {
 
    static finalSignUp = async (payload) => {
         const { hashEmail } = payload;
-        console.log("hashEmail", hashEmail);
         const foundHashEmail = await userModel.findOne({email: new RegExp(`${hashEmail}$`)});
         if(foundHashEmail) {
             foundHashEmail.email = await atob(foundHashEmail.email.split('@')[0]);
@@ -118,7 +117,7 @@ class AccessService {
             return {
                 code: 201,
                 metadata: {
-                    shop: getInfoData({ fileds:['_id', 'name', 'email'], object: foundHashEmail }),
+                    shop: getInfoData({ fileds:['_id', 'name', 'email', 'roles'], object: foundHashEmail }),
                     tokens
                 }
             }

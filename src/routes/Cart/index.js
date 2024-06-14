@@ -6,7 +6,7 @@ const { authencationV2 } = require('../../auth/authUtils');
 const rateLimiter = require('../../middleware/rateLimiter');
 
 router.use(authencationV2);
-router.use(rateLimiter);
+// router.use(rateLimiter);
 
 router.post("/addToCart", handlerError(cartController.addToCart));
 router.post("/updateQuantity", handlerError(cartController.updateQuantityFood));

@@ -66,6 +66,13 @@ class FoodController{
             metadata: await FoodServices.updateFood( req.params.foodId, req.body )
         }).send(res);
     }
+
+    deleteFood = async ( req, res, next ) => {
+        new SuccessResponse({
+            message: "delete food success",
+            metadata: await FoodServices.deleteFood( req.params.foodId )
+        }).send(res);
+    }
 }
 
 

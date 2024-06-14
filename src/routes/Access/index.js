@@ -12,7 +12,7 @@ router.post("/forgotpassword", handlerError(AccessService.forgotPassword));
 router.post("/reset-password", handlerError(AccessService.resetPassword));
 
 router.use(authencationV2);
-router.use(rateLimiter);
+// router.use(rateLimiter);
 
 router.get("/logout", handlerError(AccessService.logout));
 router.get("/profile", handlerError(AccessService.getProfile));
