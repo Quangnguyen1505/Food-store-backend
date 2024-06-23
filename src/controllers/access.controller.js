@@ -11,6 +11,13 @@ class FoodController{
         }).send(res);
     }
 
+    finalSignUp = async ( req, res, next ) => {
+        new SuccessResponse({
+            message: "create user success",
+            metadata: await AccessService.finalSignUp(req.body)
+        }).send(res);
+    }
+
     login = async ( req, res, next ) => {
         new SuccessResponse({
             message: "login user success",

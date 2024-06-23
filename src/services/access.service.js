@@ -10,8 +10,8 @@ const tokenModel = require("../models/keyToken.model");
 const { sendMail } = require("../utils/sendMail");
 const { userValidate } = require("../helper/validation");
 
-RoleShop = {
-    SHOP:'SHOP',
+Role = {
+    USER:'USER',
     WRITER:'WRITER',
     EDITOR: 'EDITOR',
     ADMIN: 'ADMIN'
@@ -50,55 +50,80 @@ class AccessService {
        })
 
        return {
-           shop: getInfoData({ fileds:['_id', 'name', 'email'], object:foundShop }),
+           shop: getInfoData({ fileds:['_id', 'name', 'email', 'roles'], object:foundShop }),
            tokens
        }
    }
 
-   static signUp = async ({ name, email, password, address})=>{
+   static signUp = async ({ name, email, password, address, role_name = 'USER'})=>{
 
             const { error } = userValidate({ email, password });
             if(error) throw new BadRequestError(error.details[0].message);
-           // step1: check email exists??
-           const hodelShop = await userModel.findOne({ email: email.toLowerCase() }).lean();
-           if(hodelShop){
-               throw new BadRequestError('Error: Shop already registered!');
-           }
-           const passwordHash = await bcrypt.hash(password, 10);
-           const newShop = await userModel.create({
-               name, email: email.toLowerCase(), password:passwordHash, roles:[RoleShop.SHOP], address
-           })
-           if(newShop){
+            // step1: check email exists??
+            const hodelShop = await userModel.findOne({ email: email.toLowerCase() }).lean();
+            if(hodelShop){
+                throw new BadRequestError('Error: Shop already registered!');
+            }
+            const hashRandom = crypto.randomBytes(64).toString('hex');
+            const passwordHash = await bcrypt.hash(password, 10);
+            const hashEmail = btoa(email) + '@' + hashRandom;
+            const newShop = await userModel.create({
+                name, email: hashEmail, password:passwordHash, roles:[Role.USER], address
+            });
+            if(newShop){
+                const html  = `<h2>Code: </h2> <br> <blockquote>${hashRandom}</blockquote>`
+                const data = {
+                    html,
+                    email,
+                    subject: `Please finish comfirm register`
+                }
+                await sendMail(data);
 
-               //created privateKey,publicKey
-               const privateKey = crypto.randomBytes(64).toString('hex');
-               const publicKey = crypto.randomBytes(64).toString('hex');
-               console.log({privateKey,publicKey});
+                setTimeout( async ()=> {
+                    await userModel.findOneAndDelete({email: hashEmail});
+                }, 30*1000);
+                // return data;
+                
+            }
+            return {
+                code: 200,
+                metadata: null
+            }
+   }
 
-               const keyStore = await KeyTokenServices.createKeyToken({
-                   userId:newShop._id,
-                   publicKey,
-                   privateKey
-               });
-               if(!keyStore){
-                   throw new BadRequestError('Error: keyStore error!');
-               }
-               // create token pair
-               const tokens = await createTokenPair({ userId:newShop._id, email }, publicKey, privateKey );
-               console.log("tokens create successfully!", tokens);
+   static finalSignUp = async (payload) => {
+        const { hashEmail } = payload;
+        const foundHashEmail = await userModel.findOne({email: new RegExp(`${hashEmail}$`)});
+        if(foundHashEmail) {
+            foundHashEmail.email = await atob(foundHashEmail.email.split('@')[0]);
+            await foundHashEmail.save()
 
-               return {
-                   code: 201,
-                   metadata: {
-                       shop: getInfoData({ fileds:['_id', 'name', 'email'], object:newShop }),
-                       tokens
-                   }
-               }
-           }
-           return {
-               code: 200,
-               metadata: null
-           }
+            //created privateKey,publicKey
+            const privateKey = crypto.randomBytes(64).toString('hex');
+            const publicKey = crypto.randomBytes(64).toString('hex');
+            console.log({privateKey,publicKey});
+
+            const keyStore = await KeyTokenServices.createKeyToken({
+                userId:foundHashEmail._id,
+                publicKey,
+                privateKey
+            });
+            if(!keyStore){
+                throw new BadRequestError('Error: keyStore error!');
+            }
+            // create token pair
+            const tokens = await createTokenPair({ userId:foundHashEmail._id, email: foundHashEmail.email  }, publicKey, privateKey );
+            console.log("tokens create successfully!", tokens);
+            return {
+                code: 201,
+                metadata: {
+                    shop: getInfoData({ fileds:['_id', 'name', 'email', 'roles'], object: foundHashEmail }),
+                    tokens
+                }
+            }
+        }
+
+
    }
 
    static getProfile = async ( userId ) => {
@@ -136,7 +161,8 @@ class AccessService {
 
         const data = {
             email,
-            html
+            html,
+            subject: "Forgot password"
         }
         const rs = await sendMail(data);
         return rs;

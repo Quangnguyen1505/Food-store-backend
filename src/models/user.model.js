@@ -44,8 +44,8 @@ const userSchema = new Schema({
         type: Date,
      },
     roles:{
-        type: Array,
-        default: []
+        type: Schema.Types.ObjectId,
+        ref: 'Role'
     }
 },{
     timestamps:true,

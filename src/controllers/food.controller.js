@@ -58,6 +58,27 @@ class FoodController{
             message: "get all food by tag success",
             metadata: await FoodServices.getAllFoodsByTag(req.params.tag)
         }).send(res);
+    } 
+
+    getAllFoodsByTagV2 = async ( req, res, next ) => {
+        new SuccessResponse({
+            message: "get all food by tag V2 success",
+            metadata: await FoodServices.getAllFoodByTagV2(req.params.tag)
+        }).send(res);
+    } 
+
+    updateFood = async ( req, res, next ) => {
+        new SuccessResponse({
+            message: "update food success",
+            metadata: await FoodServices.updateFood( req.params.foodId, req.body )
+        }).send(res);
+    }
+
+    deleteFood = async ( req, res, next ) => {
+        new SuccessResponse({
+            message: "delete food success",
+            metadata: await FoodServices.deleteFood( req.params.foodId )
+        }).send(res);
     }
 }
 

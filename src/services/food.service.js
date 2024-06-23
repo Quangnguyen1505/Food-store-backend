@@ -10,8 +10,8 @@ class FoodServices{
 
     static insertFood = async ({
         payload
-    }) =>{
-        const { name, price, tags, favorite, stars, imageUrl, origins, cookTime  } = payload
+    }) => {
+        const { name, price, tags, favorite = false, stars = 5.0, imageUrl, origins, cookTime  } = payload
         const foundFood = await food.findOne({name});
         if(foundFood) throw new NotFoundError("food is not exitst");
 
@@ -104,18 +104,18 @@ class FoodServices{
         searchTerm
     }) => {
         let foods;
-        
-        const key = `food-search`
-        const getRedisSearch = await foundRedis(key);
-        if( getRedisSearch ){
-            foods = JSON.parse(getRedisSearch);
-            return foods;
-        }
+        console.log("search::", searchTerm);
+        // const key = `food-search`
+        // const getRedisSearch = await foundRedis(key);
+        // if( getRedisSearch ){
+        //     foods = JSON.parse(getRedisSearch);
+        //     return foods;
+        // }
 
         const searchRegex = new RegExp(searchTerm, 'i');
         foods = await food.find({ name: { $regex: searchRegex } });
 
-        await setRedis(key, foods);
+        //await setRedis(key, foods);
 
         return foods;
     }
@@ -170,7 +170,49 @@ class FoodServices{
             totalCount
         }
     }
-}
+
+    static getAllFoodByTagV2 = async (tag) => {
+        const foundFood = await food.aggregate([
+            {
+                $match: {
+                    tags: tag
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    name: 1,
+                    price: 1,
+                    favorite: 1,
+                    imageUrl: 1,
+                    origins: 1,
+                    cookTime: 1,
+                }
+            }
+
+        ]);
+        if(!foundFood) throw new BadRequestError('tag not exists!');
+        const totalCount = foundFood.length;
+        return { foundFood, totalCount};
+    }
+
+    static updateFood = async ( foodId, payload ) => {
+        const foods = await food.findById(foodId);
+        if(!foods) throw new NotFoundError("food is not exists");
+        const newFood = await food.findByIdAndUpdate(foodId, payload, {
+            new: true
+        });
+        
+        return newFood
+    }
+
+    static deleteFood = async ( foodId ) => {
+        const foods = await food.findById(foodId);
+        if(!foods) throw new NotFoundError("food is not exists");
+
+        return await food.findByIdAndDelete(foodId);
+    }
+} 
 
 
 module.exports = FoodServices
