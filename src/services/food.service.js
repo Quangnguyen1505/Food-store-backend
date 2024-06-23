@@ -171,6 +171,31 @@ class FoodServices{
         }
     }
 
+    static getAllFoodByTagV2 = async (tag) => {
+        const foundFood = await food.aggregate([
+            {
+                $match: {
+                    tags: tag
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    name: 1,
+                    price: 1,
+                    favorite: 1,
+                    imageUrl: 1,
+                    origins: 1,
+                    cookTime: 1,
+                }
+            }
+
+        ]);
+        if(!foundFood) throw new BadRequestError('tag not exists!');
+        const totalCount = foundFood.length;
+        return { foundFood, totalCount};
+    }
+
     static updateFood = async ( foodId, payload ) => {
         const foods = await food.findById(foodId);
         if(!foods) throw new NotFoundError("food is not exists");

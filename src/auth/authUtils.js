@@ -12,12 +12,10 @@ const HEADER = {
 const createTokenPair = async ( payload, publicKey, privateKey )=>{
     try {
         const asscessToken = JWT.sign( payload, publicKey, {
-            // algorithm: 'RS256',
             expiresIn: '2 days'
         });
 
         const refreshToken = JWT.sign( payload, privateKey, {
-            // algorithm: 'RS256',
             expiresIn: '7 days'
         });
 

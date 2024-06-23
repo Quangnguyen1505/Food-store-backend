@@ -60,6 +60,13 @@ class FoodController{
         }).send(res);
     } 
 
+    getAllFoodsByTagV2 = async ( req, res, next ) => {
+        new SuccessResponse({
+            message: "get all food by tag V2 success",
+            metadata: await FoodServices.getAllFoodByTagV2(req.params.tag)
+        }).send(res);
+    } 
+
     updateFood = async ( req, res, next ) => {
         new SuccessResponse({
             message: "update food success",

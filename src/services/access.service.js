@@ -55,7 +55,7 @@ class AccessService {
        }
    }
 
-   static signUp = async ({ name, email, password, address})=>{
+   static signUp = async ({ name, email, password, address, role_name = 'USER'})=>{
 
             const { error } = userValidate({ email, password });
             if(error) throw new BadRequestError(error.details[0].message);
