@@ -14,12 +14,13 @@ class UserService {
         return foundUsers;
     }
 
-    static async updateUser( userId, payload ){
+    static async updateUser({ userId, body }){
+        console.log("update::", { userId, body });
         const foundUser = await findUserById(userId);
         if(!foundUser) throw new BadRequestError('User not extsit');
         
-        return await userModel.findByIdAndUpdate(userId, payload, {
-            new: isNew
+        return await userModel.findByIdAndUpdate(userId, body, {
+            new: true
         });
     }
 
@@ -28,6 +29,13 @@ class UserService {
         if(!foundUser) throw new BadRequestError('User not extsit');
 
         return await userModel.findByIdAndDelete(userId);
+    }
+
+    static async getUserById(userId){
+        const foundUser = await findUserById(userId);
+        if(!foundUser) throw new BadRequestError('User not extsit');
+
+        return foundUser;
     }
 
 }

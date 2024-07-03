@@ -5,7 +5,7 @@ class UserController {
     updateUser = async ( req, res, next ) => {
         new SuccessResponse({
             message: "update user success",
-            metadata: await userService.updateUser(req.userId, req.body)
+            metadata: await userService.updateUser(req.body)
         }).send(res);
     }
 
@@ -20,6 +20,13 @@ class UserController {
         new SuccessResponse({
             message: "delete user success",
             metadata: await userService.deleteUser(req.userId)
+        }).send(res);
+    }
+
+    getOneUser = async ( req, res, next ) => {
+        new SuccessResponse({
+            message: "delete user success",
+            metadata: await userService.getUserById(req.params.id)
         }).send(res);
     }
 }

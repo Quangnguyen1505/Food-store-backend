@@ -6,6 +6,7 @@ const { authencationV2 } = require('../../auth/authUtils');
 const rateLimiter = require('../../middleware/rateLimiter');
 
 router.get("", handlerError(userController.ListUser));
+router.get("/current/:id", handlerError(userController.getOneUser));
 
 router.use(authencationV2);
 router.use(rateLimiter);

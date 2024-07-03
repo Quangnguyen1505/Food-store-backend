@@ -10,7 +10,7 @@ router.get("", handlerError(FoodService.getFood));
 router.get("/findone/:id", handlerError(FoodService.getFoodById));
 router.get("/allSearch/:searchTerm", handlerError(FoodService.getAllFoodsBySearchTerm));
 router.post("/tag", handlerError(FoodService.createTag));
-router.get("/tag",grantAccess('readAny','profile'), handlerError(FoodService.getTags));
+router.get("/tag", handlerError(FoodService.getTags));
 router.get("/AllFoodBytag/:tag", handlerError(FoodService.getAllFoodsByTag));
 router.get("/AllFoodBytagV2/:tag", grantAccess('readAny','profile'), handlerError(FoodService.getAllFoodsByTagV2));
 

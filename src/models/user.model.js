@@ -32,6 +32,10 @@ const userSchema = new Schema({
         enum: ['active','inactive'],
         default:'inactive'
     },
+    avatarUrl:{
+        type:String,
+        default: null
+    },
     verfify:{
         type:Schema.Types.Boolean,
         default:false
