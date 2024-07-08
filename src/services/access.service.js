@@ -68,7 +68,7 @@ class AccessService {
             const passwordHash = await bcrypt.hash(password, 10);
             const hashEmail = btoa(email) + '@' + hashRandom;
             const newShop = await userModel.create({
-                name, email: hashEmail, password:passwordHash, roles:[Role.USER], address
+                name, email: hashEmail, password:passwordHash, roles:[role_name], address
             });
             if(newShop){
                 const html  = `<h2>Code: </h2> <br> <blockquote>${hashRandom}</blockquote>`
@@ -122,8 +122,6 @@ class AccessService {
                 }
             }
         }
-
-
    }
 
    static getProfile = async ( userId ) => {

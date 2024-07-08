@@ -5,28 +5,29 @@ const { createNotification } = require('./notification.service');
 
 class DiscountService {
   static async createDiscount( payload ) {
-    const{ code, name, value, startDate, endDate, count, foodIds } = payload;
+    const{ discount_code, discount_name, discount_value,
+      discount_start_date, discount_end_date, discount_count, discount_food_ids } = payload;
 
-    if(!name || !value || !startDate || !endDate){
+    if(!discount_name || !discount_value || !discount_start_date || !discount_end_date){
       throw new NotFoundValueError('Missing required fields');
     }
 
-    if(count < 0){
+    if(discount_count < 0){
       throw new BadRequestError('Invalid count value');
     }
 
-    if(new Date(startDate) >=  new Date(endDate)){
+    if(new Date(discount_start_date) >=  new Date(discount_end_date)){
       throw new BadRequestError('Invalid date range');
     }
 
     const newDiscount = await discountModel.create({
-      discount_name: name,
-      discount_code: code,
-      discount_value: value,
-      discount_start_date: startDate,
-      discount_end_date: endDate,
-      discount_count: count,
-      discount_food_ids: foodIds
+      discount_name,
+      discount_code,
+      discount_value,
+      discount_start_date,
+      discount_end_date,
+      discount_count,
+      discount_food_ids
     });
 
     if(!newDiscount) throw new BadRequestError('Create discount failed');
@@ -74,8 +75,10 @@ class DiscountService {
     
   }
 
-  static async getAllDiscounts(){
-    return discountModel.find().select('-__v');
+  static async getAllDiscounts({limit = 8, sort = 'ctime', page = 1}){
+    const skip = (page - 1) * limit;
+    const sortBy = sort == 'ctime' ? {_id: -1} : {_id: 1};
+    return discountModel.find().select('-__v').limit(limit).skip(skip).sort(sortBy);
   }
 
   static async getDiscountById( discountId ){
@@ -87,15 +90,38 @@ class DiscountService {
     return foundDiscount;
   }
 
-  static async deleteDiscount( discountCode ){
-    const foundDiscountCode = await checkExistDisocunt(discountCode);;
-    if(!foundDiscountCode){
+  static async deleteDiscount( discountId ){
+    const foundDiscountId = await discountModel.findById(discountId);
+    if(!foundDiscountId){
       throw new BadRequestError('Discount not found');
     }
 
-    const delDiscount = discountModel.findByIdAndDelete(foundDiscountCode._id);
+    const delDiscount = discountModel.findByIdAndDelete(foundDiscountId._id);
 
     return delDiscount;
+  }
+
+  static async updateDiscount( payload ){
+    console.log("payload::", payload);
+    const { discountId, discount_endDate, discount_start_date, discount_end_date, discount_count } = payload;
+
+    if(!discountId || !discount_start_date || !discount_end_date){
+      throw new NotFoundValueError('Missing required fields');
+    }
+
+    if(discount_count < 0){
+      throw new BadRequestError('Invalid count value');
+    }
+
+    if(new Date(discount_start_date) >=  new Date(discount_end_date)){
+      throw new BadRequestError('Invalid date range');
+    }
+
+    const updateDis = await discountModel.findByIdAndUpdate(discountId, payload, {
+      new: true
+    });
+
+    return updateDis;
   }
 
 }

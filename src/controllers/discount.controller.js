@@ -10,6 +10,13 @@ class DiscountController{
         }).send(res);
     }
 
+    updateDiscount = async ( req, res, next ) => {
+        new SuccessResponse({
+            message: "Update discount success",
+            metadata: await DiscountServices.updateDiscount(req.body)
+        }).send(res);
+    }
+
     getDiscountAmout = async ( req, res, next ) => {
         new SuccessResponse({
             message: "Create discount success",
@@ -20,7 +27,7 @@ class DiscountController{
     getAllDiscount = async ( req, res, next ) => {
         new SuccessResponse({
             message: "get all discount success",
-            metadata: await DiscountServices.getAllDiscounts()
+            metadata: await DiscountServices.getAllDiscounts(req.query)
         }).send(res);
     }
 
@@ -28,6 +35,13 @@ class DiscountController{
         new SuccessResponse({
             message: "get all discount success",
             metadata: await DiscountServices.getDiscountById(req.params.discount_id)
+        }).send(res);
+    }
+
+    deleteDiscountById = async ( req, res, next ) => {
+        new SuccessResponse({
+            message: "delete discount success",
+            metadata: await DiscountServices.deleteDiscount(req.params.discount_id)
         }).send(res);
     }
 }

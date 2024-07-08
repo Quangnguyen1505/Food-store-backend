@@ -8,9 +8,9 @@ const { findFoodById } = require('../models/repo/cart.repo');
 
 class FoodServices{
 
-    static insertFood = async ({
+    static insertFood = async (
         payload
-    }) => {
+    ) => {
         const { name, price, tags, favorite = false, stars = 5.0, imageUrl, origins, cookTime  } = payload
         const foundFood = await food.findOne({name});
         if(foundFood) throw new NotFoundError("food is not exitst");

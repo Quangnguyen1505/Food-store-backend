@@ -11,7 +11,8 @@ router.get("/current/:id", handlerError(userController.getOneUser));
 router.use(authencationV2);
 router.use(rateLimiter);
 
+router.post("/create", handlerError(userController.createUser));
 router.post("/update", handlerError(userController.updateUser));
-router.post("/delete", handlerError(userController.deleteUser));
+router.get("/delete/:userId", handlerError(userController.deleteUser));
 
 module.exports = router

@@ -2,6 +2,14 @@ const { SuccessResponse } = require('../core/success.response');
 const userService = require('../services/user.service');
 
 class UserController {
+
+    createUser = async ( req, res, next ) => {
+        new SuccessResponse({
+            message: "create user success",
+            metadata: await userService.createUser(req.body)
+        }).send(res);
+    }
+
     updateUser = async ( req, res, next ) => {
         new SuccessResponse({
             message: "update user success",
@@ -19,7 +27,7 @@ class UserController {
     deleteUser = async ( req, res, next ) => {
         new SuccessResponse({
             message: "delete user success",
-            metadata: await userService.deleteUser(req.userId)
+            metadata: await userService.deleteUser(req.params.userId)
         }).send(res);
     }
 

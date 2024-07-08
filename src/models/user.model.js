@@ -47,10 +47,10 @@ const userSchema = new Schema({
     resetPasswordExpires: {
         type: Date,
      },
-    roles:{
+    roles:[{
         type: Schema.Types.ObjectId,
         ref: 'Role'
-    }
+    }]
 },{
     timestamps:true,
     collection:COLLECTION_NAME
