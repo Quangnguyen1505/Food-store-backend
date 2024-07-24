@@ -2,6 +2,7 @@ const { BadRequestError, NotFoundValueError } = require('../core/error.response'
 const discountModel = require('../models/discount.model');
 const { checkExistDisocunt } = require('../models/repo/discount.repo');
 const { createNotification } = require('./notification.service');
+const socketConfig = require('../config/io.config');
 
 class DiscountService {
   static async createDiscount( payload ) {
@@ -32,13 +33,16 @@ class DiscountService {
 
     if(!newDiscount) throw new BadRequestError('Create discount failed');
 
-    await createNotification({
+    const noti = await createNotification({
       noti_type: "PROMOTION-001",
       noti_options: {
         discountId: newDiscount._id,
         discountName: newDiscount.discount_name
       }
-    })
+    });
+
+    const io = socketConfig.getIO();
+    io.sockets.emit('discountCreated', noti);
 
     return newDiscount;
   }

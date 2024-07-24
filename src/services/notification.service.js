@@ -24,7 +24,7 @@ class NotificationService {
     }
 
     static async listNoti({
-        type = 'ALL',
+        type = 'ALL'
     }){
         return await NOTI.aggregate([
             {
@@ -33,20 +33,15 @@ class NotificationService {
                 }
             },
             {
+                $sort: { createdAt: -1 }
+            },
+            {
                 $project: {
                     noti_type: 1,
                     noti_content: 1,
-                    noti_options: {
+                    noti_options: type === 'ALL' ? 1 : {
                         $switch: {
                             branches: [
-                                {
-                                    case: { $eq: [ type, 'ALL' ] },
-                                    then: {
-                                        $concat: [
-                                            { $toString: "$noti_options" },
-                                        ]
-                                    }
-                                },
                                 {
                                     case: { $eq: [ type, 'PROMOTION-001' ] },
                                     then: {
@@ -71,7 +66,7 @@ class NotificationService {
                             default: "No specific information available"
                         }
                     },
-                    createAt: 1
+                    createdAt: 1
                 }
             }
         ])

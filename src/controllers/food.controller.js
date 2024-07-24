@@ -2,6 +2,10 @@ const { SuccessResponse } = require("../core/success.response");
 const FoodServices = require("../services/food.service");
 
 class FoodController{
+    constructor(io) {
+        this.io = io;
+    }
+    
     createFood = async ( req, res, next ) => {
         new SuccessResponse({
             message: "create food success",

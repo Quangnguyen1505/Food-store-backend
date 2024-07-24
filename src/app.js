@@ -5,6 +5,7 @@ var morgan = require('morgan');
 var helmet =require('helmet');
 var compression = require('compression')
 const cors = require('cors');
+const socketConfig = require('./config/io.config');
 
 //init middelwares
 app.use(morgan("dev"));
@@ -19,6 +20,10 @@ app.use(cors());
 //init db
 require('./db/init.mongo');
 require('./db/init.redis');
+
+//apply socket io 
+const server = require('http').createServer(app);
+socketConfig.init(server);
 
 //init routes
 app.use('/', require('./routes'));
@@ -40,4 +45,7 @@ app.use(( error, req, res, next ) => {
     })
 });
 
-module.exports = app;
+// require('./config/socket-io.config')(io);
+
+
+module.exports = server;

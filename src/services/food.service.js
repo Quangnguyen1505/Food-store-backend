@@ -5,6 +5,7 @@ const { createNotification } = require('./notification.service');
 const { getFoodRedis, cacheCount, setItemFoods, setTotalCount, setRedis, foundRedis } = require('../db/repo/redis.cacheFood');
 const { findUserById } = require('../models/repo/access.repo');
 const { findFoodById } = require('../models/repo/cart.repo');
+const socketConfig = require('../config/io.config');
 
 class FoodServices{
 
@@ -38,13 +39,16 @@ class FoodServices{
         await foundTagAll.save();
 
         //noti
-        await createNotification({
+        const noti = await createNotification({
             noti_type: "SHOP-001",
             noti_options: {
                 foodId: newFood._id,
                 foodName: newFood.name
             }
         });
+
+        const io = socketConfig.getIO();
+        io.sockets.emit('foodCreated', noti);
 
         return newFood
     }
