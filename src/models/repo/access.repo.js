@@ -7,7 +7,7 @@ const findByEmail = async ({ email, select = {
 }
 
 const findUserById = async (userId) => {
-    return await userModel.findById(userId).lean();
+    return await userModel.findById(userId);
 }
 
 module.exports = {

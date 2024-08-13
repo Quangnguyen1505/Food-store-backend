@@ -50,7 +50,14 @@ class FoodController{
     resetPassword = async (req,res,next)=>{
         new SuccessResponse ({
             message: "reset password OK !!",
-            metadata:  await AccessService.resetPassword(req.body)
+            metadata: await AccessService.resetPassword(req.body)
+        }).send(res)
+    }
+
+    changePassword = async (req,res,next)=>{
+        new SuccessResponse ({
+            message: "change password success !!",
+            metadata: await AccessService.changePasswordCurrentUser(req.body, req.userId)
         }).send(res)
     }
 }

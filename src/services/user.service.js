@@ -7,6 +7,7 @@ const { getInfoData } = require("../utils");
 const KeyTokenServices = require("./keyToken.service");
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
+const cloudinary = require('../config/cloudinary.config');
 
 class UserService {
     static async getListUser({ limit = 8, sort = 'ctime', page = 1 }){
@@ -59,7 +60,20 @@ class UserService {
         const foundUser = await findUserById(userId);
         if(!foundUser) throw new BadRequestError('User not extsit');
 
-        return await userModel.findByIdAndDelete(userId);
+        const avatarUrl = foundUser.avatarUrl;
+        const publicId = String(avatarUrl.split('/').slice(-2).join('/').split('.')[0]);
+        
+        const result = await cloudinary.uploader.destroy('Food/'+publicId, {
+            invalidate: true, // Optional: if you want to invalidate the cache
+            resource_type: 'image' // Optional: if you are deleting an image
+        });
+        if (result.result  !== 'ok') {
+            console.error("Failed to delete image in Cloudinary:", result);
+            throw new Error('Failed to delete image in Cloudinary');
+        }
+        console.log("Deleted image in Cloudinary:", result);
+        
+        return await userModel.findByIdAndDelete(foundUser._id);
     }
 
     static async getUserById(userId){

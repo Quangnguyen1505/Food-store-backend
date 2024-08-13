@@ -1,6 +1,6 @@
 const { createTokenPair } = require("../auth/authUtils");
 const { BadRequestError, AuthFailureError } = require("../core/error.response");
-const { findByEmail } = require("../models/repo/access.repo");
+const { findByEmail, findUserById } = require("../models/repo/access.repo");
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const KeyTokenServices = require("./keyToken.service");
@@ -175,6 +175,20 @@ class AccessService {
         foundToken.resetPasswordToken = '';
         foundToken.resetPasswordExpires = undefined;
         await foundToken.save();
+    }
+
+    static changePasswordCurrentUser = async ({ oldPassword, newPassword }, userId) => {
+        const foundUser = await findUserById(userId);
+        if(!foundUser) throw new BadRequestError('User not extsit');
+        
+        const match = await bcrypt.compare( oldPassword, foundUser.password );
+        if(!match) throw new AuthFailureError('Authencation error');
+
+        const passwordHash = await bcrypt.hash(newPassword, 10);
+        console.log("passwordHash::", passwordHash);
+        foundUser.password = passwordHash;
+        
+        await foundUser.save();
     }
 }
 

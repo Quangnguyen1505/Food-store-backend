@@ -41,7 +41,7 @@ const rateLimiter = async ( req, res, next ) => {
     }
 
     console.log("client.count",client.count);
-    if(client.count >= +5) return res.json({
+    if(client.count >= +10) return res.json({
         result: "error",
         message: "not spam!!"
     });
